@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import com.example.pharmacydemo.databinding.ActivityMainBinding
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
@@ -27,6 +28,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getPharmacyData() {
+        runOnUiThread {
+            binding.progressBar.visibility = View.VISIBLE
+        }
+
         // 資料網址
         val pharmaciesDataUrl = "https://raw.githubusercontent.com/thishkt/pharmacies/master/data/info.json"
 
@@ -52,6 +57,10 @@ class MainActivity : AppCompatActivity() {
         // 執行 Call 連線後，採用 enqueue 非同步方式，獲取到回應的結果資料
         call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    binding.progressBar.visibility = View.GONE
+                }
+
                 Log.d("Log", "onFailure: $e")
             }
 
@@ -83,6 +92,7 @@ class MainActivity : AppCompatActivity() {
 //                }
 
                 runOnUiThread {
+                    binding.progressBar.visibility = View.GONE
                     binding.tvPharmaciesData.text = pharmacyNames
                 }
 
