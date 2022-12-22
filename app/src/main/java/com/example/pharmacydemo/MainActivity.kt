@@ -1,16 +1,25 @@
 package com.example.pharmacydemo
 
+import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.example.pharmacydemo.databinding.ActivityMainBinding
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.IOException
+import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+//        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         getPharmacyData()
     }
@@ -45,7 +54,30 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                Log.d("Log", "onResponse: ${response.body?.string()}")
+
+                val pharmaciesData = response.body?.string()
+
+                // 整包字串資料轉成 JSONObject 格式
+                val jsonObj = JSONObject(pharmaciesData)
+
+                // features 是一個陣列，因此需要轉換成 JSON Array
+                val featuresArray = JSONArray(jsonObj.getString("features"))
+
+                // 藥局名稱
+                // 使用 String 處理串接文字，當資料很多時很容易造成 OOM 記憶體不足，建議使用 StringBuilder
+                val pharmacyNames = StringBuilder()
+                for (features in 0 until featuresArray.length()) {
+                    val properties = featuresArray.getJSONObject(features).getString("properties")
+                    val propertiesObj = JSONObject(properties)
+
+                    // 將每次獲取到的藥局名稱，多加跳行符號，存到變數中
+                    pharmacyNames.append(propertiesObj.getString("name") + "\n")
+                }
+
+                runOnUiThread {
+                    binding.tvPharmaciesData.text = pharmacyNames
+                }
+
             }
         })
     }
