@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
 
                 val pharmacyNames = StringBuilder()
                 for (feature in pharmacyInfo.features) {
-                    pharmacyNames.append(feature.property.name + "\n")
+                    pharmacyNames.append(feature.properties.name + "\n")
                 }
 
                 runOnUiThread {
