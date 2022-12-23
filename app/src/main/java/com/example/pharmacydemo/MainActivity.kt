@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.pharmacydemo.OKHttpUtli.Companion.mOKHttpUtli
 import com.example.pharmacydemo.databinding.ActivityMainBinding
 import com.google.gson.Gson
@@ -18,12 +21,37 @@ import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var viewAdapter: MainAdapter
+    private lateinit var viewManager: RecyclerView.LayoutManager
+
+    private fun initView() {
+        // 定義 LayoutManager 為 LinearLayoutManager
+        viewManager = LinearLayoutManager(this)
+
+        // 自定義 Adapter 為 MainAdapter
+        viewAdapter = MainAdapter()
+
+        // 定義從佈局當中，拿到 recycler_view 元件
+        binding.recyclerView.apply {
+            layoutManager = viewManager
+            adapter = viewAdapter
+
+            addItemDecoration(
+                DividerItemDecoration(
+                    this@MainActivity,
+                    DividerItemDecoration.VERTICAL
+                )
+            )
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        setContentView(R.layout.activity_main)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        initView()
 
         getPharmacyData()
     }
@@ -48,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     binding.progressBar.visibility = View.GONE
-                    binding.tvPharmaciesData.text = pharmacyNames
+                    viewAdapter.pharmacyList = pharmacyInfo.features
                 }
             }
 
@@ -125,18 +153,3 @@ class MainActivity : AppCompatActivity() {
 //        })
     }
 }
-
-class PharmacyInfo(
-    @SerializedName("features")
-    val features: List<Feature>
-)
-
-class Feature(
-    @SerializedName("properties")
-    val property: Property
-)
-
-class Property(
-    @SerializedName("name")
-    val name: String
-)
